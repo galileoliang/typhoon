@@ -95,6 +95,17 @@ class ViewController: UIViewController {
     // 添加數據模型
     private var regionStatuses: [RegionStatus] = []
 
+    private let ktvButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("推薦KTV", for: .normal)
+        button.backgroundColor = UIColor(red: 0.2, green: 0.6, blue: 0.8, alpha: 1.0)
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 10
+        button.isHidden = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -120,6 +131,7 @@ class ViewController: UIViewController {
         cardView.addSubview(cityPicker)
         cardView.addSubview(resultLabel)
         view.addSubview(holidayImageView)
+        view.addSubview(ktvButton)
         
         // 設置約束
         NSLayoutConstraint.activate([
@@ -144,8 +156,16 @@ class ViewController: UIViewController {
             holidayImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             holidayImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.7),
             holidayImageView.heightAnchor.constraint(equalTo: holidayImageView.widthAnchor),
-            holidayImageView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            holidayImageView.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            
+            ktvButton.topAnchor.constraint(equalTo: holidayImageView.bottomAnchor, constant: 20),
+            ktvButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            ktvButton.widthAnchor.constraint(equalToConstant: 120),
+            ktvButton.heightAnchor.constraint(equalToConstant: 44),
+            ktvButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
         ])
+        
+        ktvButton.addTarget(self, action: #selector(ktvButtonTapped), for: .touchUpInside)
     }
     
     private func fetchAndParseData() {
@@ -258,14 +278,49 @@ class ViewController: UIViewController {
                     if regionStatus.status.contains("停止上課") {
                         self?.holidayImageView.image = UIImage(named: "karaoke")
                         self?.resultLabel.textColor = UIColor(red: 0.2, green: 0.7, blue: 0.3, alpha: 1.0)
+                        self?.ktvButton.isHidden = false
                         self?.playSound(named: "happy")
                     } else {
                         self?.holidayImageView.image = UIImage(named: "hardwork")
                         self?.resultLabel.textColor = UIColor(red: 0.8, green: 0.2, blue: 0.2, alpha: 1.0)
+                        self?.ktvButton.isHidden = true
                         self?.playSound(named: "sad")
                     }
                 })
             }
+        }
+    }
+
+    private func createKTVView() -> UIView {
+        let ktvView = UIView()
+        ktvView.backgroundColor = UIColor(red: 0.2, green: 0.2, blue: 0.3, alpha: 1.0)
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "歡迎來到錢櫃KTV"
+        titleLabel.textAlignment = .center
+        titleLabel.font = .systemFont(ofSize: 32, weight: .bold)
+        titleLabel.textColor = .white
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        ktvView.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            titleLabel.centerXAnchor.constraint(equalTo: ktvView.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: ktvView.centerYAnchor)
+        ])
+        
+        return ktvView
+    }
+
+    @objc private func ktvButtonTapped() {
+        let ktvView = createKTVView()
+        ktvView.frame = view.bounds
+        
+        UIView.transition(from: view,
+                         to: ktvView,
+                         duration: 0.5,
+                         options: .transitionCrossDissolve) { _ in
+            self.view = ktvView
         }
     }
 }
